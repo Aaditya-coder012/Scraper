@@ -84,87 +84,110 @@
         Built with ❤️ by <span class="text-gray-800">Growth Swift</span>
     </footer>
 
-    <script>
-        // const API_BASE_URL = "http://127.0.0.1:5000"; 
-        let emailResults = []; 
+<script>
+    // --- GLOBAL STATE ---
+    // This variable stores the leads so the download button can access them
+    let currentLeads = [];
 
-        const eForm = document.getElementById("emailForm");
-        const resDiv = document.getElementById("result");
-        const resDivEmailOutput = document.getElementById("result_email_output");
-        const pageOutputEmail = document.getElementById("pageOutput_email");
-        const errDiv = document.getElementById("error");
-        const dlBtn = document.getElementById("downloadBtn");
-        const loader = document.getElementById("loadingOverlay");
+    const sForm = document.getElementById("scrapeForm"); // If your form ID is different, update this
+    const resDiv = document.getElementById("result");
+    const errDiv = document.getElementById("error");
+    const dlBtn = document.getElementById("downloadBtn");
+    const loader = document.getElementById("loadingOverlay");
 
-        function resetUI() {
-            errDiv.classList.add("hidden");
-            resDiv.classList.add("hidden");
-            resDivEmailOutput.classList.add('hidden');
-        }
+    // --- CRAWL FUNCTION ---
+    async function startCrawl(e) {
+        if(e) e.preventDefault();
+        
+        // Reset UI
+        errDiv.classList.add("hidden");
+        resDiv.classList.add("hidden");
+        dlBtn.classList.add("hidden");
+        resDiv.innerHTML = "";
+        loader.classList.remove("hidden");
 
-        function handleError(err, message) {
-            errDiv.innerText = message || err.message;
-            errDiv.classList.remove("hidden");
-            loader.style.display = "none";
-        }
+        const urlVal = document.getElementById("crawl-url")?.value || document.getElementById("url")?.value;
+        const depthVal = document.getElementById("depth")?.value || 1;
 
-        eForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const url = document.getElementById("urlInput_email").value.trim();
-            const max_pages = parseInt(document.getElementById("maxPagesInput_email").value) || 1;
+        try {
+            const response = await fetch('/api/crawl', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: urlVal, max_pages: depthVal })
+            });
 
-            resetUI();
-            loader.style.display = "flex";
-            
-            try {
-                const response = await fetch(`/api/crawl`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url, max_pages })
-                });
+            if (!response.ok) throw new Error(`Server Error (${response.status})`);
 
-                if (!response.ok) throw new Error(`Server Error (${response.status})`);
+            const data = await response.json();
+
+            if (data.success && data.results.length > 0) {
+                currentLeads = data.results; // SAVE DATA FOR DOWNLOAD
                 
-                const data = await response.json();
-                if (!data.success) throw new Error(data.error || "Extraction failed.");
+                // Build the results UI
+                let html = `<div class="space-y-4">
+                    <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest block">Extracted Intelligence</span>`;
+                
+                data.results.forEach(lead => {
+                    html += `
+                        <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <p class="text-sm font-bold text-gray-900">${lead.email}</p>
+                            <p class="text-[10px] text-gray-400 truncate">${lead.source_page}</p>
+                        </div>`;
+                });
+                html += `</div>`;
 
-                emailResults = data.results || [];
+                resDiv.innerHTML = html;
                 resDiv.classList.remove("hidden");
-                resDivEmailOutput.classList.remove('hidden');
-
-                if (emailResults.length > 0) {
-                    let text = `--- FOUND ${emailResults.length} CONTACTS ---\n\n`;
-                    emailResults.forEach(item => {
-                        text += `SOURCE: ${item.source_page}\n`;
-                        text += `EMAIL: ${item.email}\n`;
-                        const name = [item.first_name, item.last_name].filter(Boolean).join(" ");
-                        text += `NAME: ${name || "N/A"}\n`;
-                        text += `ROLE: ${item.designations || "N/A"}\n`;
-                        text += `-----------------------------------\n\n`;
-                    });
-                    pageOutputEmail.value = text;
-                    
-                    dlBtn.onclick = async () => {
-                        const dlResponse = await fetch(`/api/download`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ results: emailResults })
-                        });
-                        const blob = await dlResponse.blob();
-                        const a = document.createElement("a");
-                        a.href = URL.createObjectURL(blob);
-                        a.download = "growth_swift_contacts.csv";
-                        a.click();
-                    };
-                } else {
-                    pageOutputEmail.value = "No contact data identified.";
-                }
-            } catch (err) {
-                handleError(err);
-            } finally {
-                loader.style.display = "none";
+                dlBtn.classList.remove("hidden");
+            } else {
+                throw new Error("No leads found on this site.");
             }
+        } catch (err) {
+            errDiv.innerText = err.message;
+            errDiv.classList.remove("hidden");
+        } finally {
+            loader.classList.add("hidden");
+        }
+    }
+
+    // --- FIXED DOWNLOAD LOGIC (No more 404) ---
+    function downloadLeadsCSV() {
+        if (currentLeads.length === 0) {
+            alert("No data available to export.");
+            return;
+        }
+
+        // 1. Build CSV content from the data in memory
+        let csvContent = "Email,Source Page\n";
+        currentLeads.forEach(lead => {
+            csvContent += `"${lead.email}","${lead.source_page}"\n`;
         });
-    </script>
+
+        // 2. Create a Blob (Binary Large Object)
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        // 3. Trigger Download
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "growth_swift_leads.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // --- EVENT LISTENERS ---
+    // Ensure your button ID matches "downloadBtn"
+    if (dlBtn) {
+        dlBtn.addEventListener("click", downloadLeadsCSV);
+    }
+
+    // Re-bind form submission if necessary
+    const mainForm = document.querySelector("form");
+    if (mainForm) {
+        mainForm.addEventListener("submit", startCrawl);
+    }
+</script>
 </body>
 </html>

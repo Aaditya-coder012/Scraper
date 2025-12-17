@@ -1,20 +1,15 @@
 import os
-import logging
+import re
 import requests
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Import your existing scraper modules
+# Assuming your scraper.py has these classes
 from scraper import HTMLFetcher, HTMLParser, MetadataExtractor, WhoisLookup, crawl_site
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
-SERPER_API_KEY = "7a8e0ca2485bd022e521147b9d713577001f46a9"
-
-# --- NAVIGATION ROUTES (Match your existing file names) ---
 @app.route("/")
 def home():
     return render_template("UI.html")
@@ -27,41 +22,47 @@ def metadata_page():
 def pagecontent_page():
     return render_template("pagecontent.html")
 
-# --- FIXED SEARCH ROUTE ---
-@app.route("/api/search", methods=["POST"])
-def api_search():
-    try:
-        data = request.get_json() or {}
-        query = data.get("query")
-        if not query: return jsonify({"error": "Query required"}), 400
-        
-        headers = {'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'}
-        payload = {"q": query}
-        response = requests.post('https://google.serper.dev/search', headers=headers, json=payload)
-        return response.json()
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# --- EXISTING SCRAPE & CRAWL ROUTES ---
 @app.route("/scrape", methods=["POST"])
 def scrape_route():
     data = request.get_json() or {}
     url = data.get("url")
+    target_keyword = data.get("keyword", "").strip()
+    
     try:
         fetcher = HTMLFetcher()
         html = fetcher.fetch(url)
-        metadata = MetadataExtractor().extract(HTMLParser().parse(html), url)
-        metadata["whois"] = WhoisLookup().lookup(url)
+        soup = HTMLParser().parse(html)
+        metadata = MetadataExtractor().extract(soup, url)
+        
+        # KEYWORD FIX: Extracting snippets if keyword is provided
+        if target_keyword:
+            text = soup.get_text()
+            # Find snippets of 50 characters around the keyword
+            matches = re.findall(rf'(.{{0,50}}{re.escape(target_keyword)}.{{0,50}})', text, re.IGNORECASE)
+            metadata["keyword"] = {
+                "term": target_keyword,
+                "count": len(matches),
+                "context_descriptions": matches[:3] # Return top 3 snippets
+            }
+        else:
+            metadata["keyword"] = None
+            
         return jsonify(metadata)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/search", methods=["POST"])
+def api_search():
+    data = request.get_json() or {}
+    query = data.get("keyword") # Matches your HTML form ID
+    # Add your Serper API logic here...
+    return jsonify({"results": []}) 
+
 @app.route("/api/crawl", methods=["POST"])
 def api_crawl():
     data = request.get_json() or {}
-    results = crawl_site(data.get("url"), max_pages=int(data.get("max_pages", 5)))
+    results = crawl_site(data.get("url"), max_pages=int(data.get("max_pages", 1)))
     return jsonify({"success": True, "results": results})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True)

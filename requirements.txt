@@ -6,7 +6,7 @@ lxml
 pandas
 python-whois
 fake-useragent
-playwright
+cloudscraper
+js2py
 gunicorn
 werkzeug
-cloudscraper
