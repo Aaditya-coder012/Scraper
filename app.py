@@ -1,33 +1,20 @@
-import sys
 import os
-import io
 import logging
-import traceback
-import pandas as pd
 import requests
-import re
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# --- ENVIRONMENT FIX ---
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-# --- MODULE IMPORTS ---
-try:
-    from scraper import HTMLFetcher, HTMLParser, MetadataExtractor, WhoisLookup, crawl_site
-except ImportError as e:
-    logging.error(f"FATAL: Missing modules: {e}")
-    # Fallback placeholders omitted for brevity; ensure scraper folder has __init__.py
+# Import your existing scraper modules
+from scraper import HTMLFetcher, HTMLParser, MetadataExtractor, WhoisLookup, crawl_site
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 SERPER_API_KEY = "7a8e0ca2485bd022e521147b9d713577001f46a9"
-logging.basicConfig(level=logging.INFO)
 
-# --- ROUTES ---
+# --- NAVIGATION ROUTES (Match your existing file names) ---
 @app.route("/")
 def home():
     return render_template("UI.html")
@@ -40,41 +27,40 @@ def metadata_page():
 def pagecontent_page():
     return render_template("pagecontent.html")
 
-@app.route("/api/crawl", methods=["POST"])
-def api_crawl():
+# --- FIXED SEARCH ROUTE ---
+@app.route("/api/search", methods=["POST"])
+def api_search():
     try:
         data = request.get_json() or {}
-        url = data.get("url")
-        max_p = int(data.get("max_pages", 5))
-        if not url: return jsonify({"error": "URL required"}), 400
+        query = data.get("query")
+        if not query: return jsonify({"error": "Query required"}), 400
         
-        results = crawl_site(url, max_pages=min(max_p, 50))
-        return jsonify({"success": True, "results": results})
+        headers = {'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'}
+        payload = {"q": query}
+        response = requests.post('https://google.serper.dev/search', headers=headers, json=payload)
+        return response.json()
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
+# --- EXISTING SCRAPE & CRAWL ROUTES ---
 @app.route("/scrape", methods=["POST"])
 def scrape_route():
     data = request.get_json() or {}
     url = data.get("url")
-    if not url: return jsonify({"error": "URL required"}), 400
-
     try:
-        fetcher = HTMLFetcher(use_proxy=False)
-        parser = HTMLParser()
-        extractor = MetadataExtractor()
-        whois = WhoisLookup()
-
+        fetcher = HTMLFetcher()
         html = fetcher.fetch(url)
-        if not html: return jsonify({"error": "Cloud block or timeout"}), 500
-        
-        soup = parser.parse(html)
-        metadata = extractor.extract(soup, url)
-        metadata["whois"] = whois.lookup(url)
-
+        metadata = MetadataExtractor().extract(HTMLParser().parse(html), url)
+        metadata["whois"] = WhoisLookup().lookup(url)
         return jsonify(metadata)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/api/crawl", methods=["POST"])
+def api_crawl():
+    data = request.get_json() or {}
+    results = crawl_site(data.get("url"), max_pages=int(data.get("max_pages", 5)))
+    return jsonify({"success": True, "results": results})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
