@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Growth Swift | Intelligence Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+        .tool-card:hover .icon-box {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-white to-purple-100 min-h-screen p-6 flex flex-col items-center justify-center">
+
+    <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white/70 backdrop-blur-md px-8 py-6 rounded-3xl shadow-sm border border-white/50">
+        <div class="flex items-center space-x-6">
+            <img src="/Micro-Tools-Growth-Swift/img~Growth swift/2024 logo-02.png" alt="Logo" class="h-20 w-auto object-contain" />
+            
+            <div class="border-l-2 border-gray-100 pl-6">
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight">Growth <span class="text-purple-600">Swift</span></h1>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Master Control Panel</p>
+            </div>
+        </div>
+        <div class="hidden md:block">
+            <span class="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-[10px] font-black uppercase tracking-widest">System Ready</span>
+        </div>
+    </header>
+
+    <main class="glass-card p-10 rounded-[2.5rem] shadow-2xl w-full max-w-lg space-y-8 text-center">
+        <div class="space-y-2">
+            <h2 class="text-3xl font-black text-gray-900 tracking-tight">Select <span class="text-purple-600">Engine</span></h2>
+            <p class="text-sm text-gray-500 font-medium">Choose an extraction module to begin intelligence gathering</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+            <a href="/templates/metadata.html" 
+               class="tool-card group flex items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 text-left">
+                
+                <div class="icon-box w-14 h-14 rounded-xl bg-purple-50 flex items-center justify-center transition-all duration-300 flex-shrink-0">
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' class="w-10 h-10">
+                        <defs>
+                            <linearGradient id='brandPurple' x1='0%' y1='0%' x2='100%' y2='100%'>
+                                <stop offset='0%' stop-color='#9333ea'/> 
+                                <stop offset='100%' stop-color='#c084fc'/>
+                            </linearGradient>
+                        </defs>
+                        <path d='M96 256 C96 160 160 96 224 192 C240 216 256 256 256 256 C256 256 272 216 288 192 C352 96 416 160 416 256 C416 352 352 416 288 320 C272 296 256 256 256 256 C256 256 240 296 224 320 C160 416 96 352 96 256 Z' 
+                              fill='none' 
+                              stroke='url(#brandPurple)' 
+                              stroke-width='48' 
+                              stroke-linecap='round' 
+                              stroke-linejoin='round'/>
+                    </svg>
+                </div>
+
+                <div class="ml-4">
+                    <h3 class="font-bold text-gray-900">SEO & Meta Scraper</h3>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Titles, Tags & WHOIS</p>
+                </div>
+            </a>
+
+            <a href="/templates/pagecontent.html" 
+               class="tool-card group flex items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 text-left">
+                <div class="icon-box w-14 h-14 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center transition-all duration-300 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="font-bold text-gray-900">Contact Extractor</h3>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Emails, Names & Leads</p>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="text-center mt-12 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+        Built with ❤️ by <span class="text-gray-800">Growth Swift</span>
+    </footer>
+
+</body>
+</html>

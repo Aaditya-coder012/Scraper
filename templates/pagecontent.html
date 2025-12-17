@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth Swift | Intelligence Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Professional Minimalist Loader */
+        .loader-ring {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #9333ea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s cubic-bezier(0.6, -0.28, 0.735, 0.045) infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .animate-pulse-slow { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+
+        #loadingOverlay {
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(4px); 
+        }
+        textarea { resize: none; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-white to-purple-100 min-h-screen p-6 flex flex-col items-center">
+
+    <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white/70 backdrop-blur-md px-8 py-6 rounded-3xl shadow-sm border border-white/50">
+        <div class="flex items-center space-x-6">
+            <img src="/Micro-Tools-Growth-Swift/img~Growth swift/2024 logo-02.png" alt="Logo" class="h-20 w-auto object-contain" />
+            
+            <div class="border-l-2 border-gray-100 pl-6">
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight">Growth <span class="text-purple-600">Swift</span></h1>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Master Control Panel</p>
+            </div>
+        </div>
+        <button onclick="window.history.back()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-black transition-all active:scale-95 uppercase tracking-widest">
+            ← BACK
+        </button>
+    </header>
+
+    <main class="glass-card p-10 rounded-[2.5rem] shadow-2xl w-full max-w-lg space-y-8 relative overflow-hidden text-center">
+        
+        <div class="space-y-2">
+            <h2 class="text-3xl font-black text-gray-900 tracking-tight">Contact <span class="text-purple-600">Extractor</span></h2>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Emails, Names & Leads</p>
+        </div>
+
+        <div id="forms-container">
+            <form id="emailForm" class="space-y-4 text-left">
+                <input type="url" id="urlInput_email" placeholder="https://example.com" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all" required />
+                <input type="number" id="maxPagesInput_email" min="1" max="50" placeholder="Depth (Max Pages, Default: 1)" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all" />
+                <button type="submit" class="w-full bg-gray-900 text-white p-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">Extract Contacts</button>
+            </form>
+        </div>
+
+        <div id="loadingOverlay" class="absolute inset-0 flex flex-col justify-center items-center z-50 hidden rounded-[2.5rem]">
+            <div class="loader-ring mb-4"></div>
+            <p id="loadingMessage" class="text-purple-700 font-bold text-sm tracking-wide animate-pulse-slow">Crawling and Extracting...</p>
+        </div>
+
+        <div id="error" class="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-medium hidden"></div>
+        
+        <div id="result" class="space-y-6 hidden pt-4 text-left">
+            <div id="result_email_output" class="space-y-4 pt-4">
+                <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest">Extracted Intelligence</span>
+                <textarea id="pageOutput_email" rows="12" class="w-full p-4 border border-gray-100 rounded-2xl bg-gray-50/50 font-mono text-xs text-gray-700 leading-relaxed" readonly></textarea>
+            </div>
+            <button id="downloadBtn" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-600 active:scale-95">
+                Download CSV Report
+            </button>
+        </div>
+    </main>
+
+    <footer class="text-center mt-12 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+        Built with ❤️ by <span class="text-gray-800">Growth Swift</span>
+    </footer>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:5000"; 
+        let emailResults = []; 
+
+        const eForm = document.getElementById("emailForm");
+        const resDiv = document.getElementById("result");
+        const resDivEmailOutput = document.getElementById("result_email_output");
+        const pageOutputEmail = document.getElementById("pageOutput_email");
+        const errDiv = document.getElementById("error");
+        const dlBtn = document.getElementById("downloadBtn");
+        const loader = document.getElementById("loadingOverlay");
+
+        function resetUI() {
+            errDiv.classList.add("hidden");
+            resDiv.classList.add("hidden");
+            resDivEmailOutput.classList.add('hidden');
+        }
+
+        function handleError(err, message) {
+            errDiv.innerText = message || err.message;
+            errDiv.classList.remove("hidden");
+            loader.style.display = "none";
+        }
+
+        eForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const url = document.getElementById("urlInput_email").value.trim();
+            const max_pages = parseInt(document.getElementById("maxPagesInput_email").value) || 1;
+
+            resetUI();
+            loader.style.display = "flex";
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/crawl`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url, max_pages })
+                });
+
+                if (!response.ok) throw new Error(`Server Error (${response.status})`);
+                
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "Extraction failed.");
+
+                emailResults = data.results || [];
+                resDiv.classList.remove("hidden");
+                resDivEmailOutput.classList.remove('hidden');
+
+                if (emailResults.length > 0) {
+                    let text = `--- FOUND ${emailResults.length} CONTACTS ---\n\n`;
+                    emailResults.forEach(item => {
+                        text += `SOURCE: ${item.source_page}\n`;
+                        text += `EMAIL: ${item.email}\n`;
+                        const name = [item.first_name, item.last_name].filter(Boolean).join(" ");
+                        text += `NAME: ${name || "N/A"}\n`;
+                        text += `ROLE: ${item.designations || "N/A"}\n`;
+                        text += `-----------------------------------\n\n`;
+                    });
+                    pageOutputEmail.value = text;
+                    
+                    dlBtn.onclick = async () => {
+                        const dlResponse = await fetch(`${API_BASE_URL}/api/download`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ results: emailResults })
+                        });
+                        const blob = await dlResponse.blob();
+                        const a = document.createElement("a");
+                        a.href = URL.createObjectURL(blob);
+                        a.download = "growth_swift_contacts.csv";
+                        a.click();
+                    };
+                } else {
+                    pageOutputEmail.value = "No contact data identified.";
+                }
+            } catch (err) {
+                handleError(err);
+            } finally {
+                loader.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>

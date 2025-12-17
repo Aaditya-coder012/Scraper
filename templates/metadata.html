@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth Swift | SEO Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Professional Minimalist Loader */
+        .loader-ring {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #9333ea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s cubic-bezier(0.6, -0.28, 0.735, 0.045) infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .animate-pulse-slow { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+
+        /* Transparent Loading Overlay */
+        #loadingOverlay {
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(4px); 
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-white to-purple-100 min-h-screen p-6 flex flex-col items-center">
+
+    <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white/70 backdrop-blur-md px-8 py-5 rounded-3xl shadow-sm border border-white/50">
+        <div>
+            <h1 class="text-2xl font-black text-gray-900 tracking-tight">Growth <span class="text-purple-600">Swift</span></h1>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">SEO Intelligence Engine</p>
+          </div>
+          <button onclick="window.history.back()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-bold transition">
+              ← BACK
+          </button>
+    </header>
+
+    <main class="glass-card p-10 rounded-[2.5rem] shadow-2xl w-full max-w-lg space-y-8 relative overflow-hidden">
+        
+        <div class="flex p-1.5 bg-gray-100 rounded-2xl">
+            <button id="btnScrape" onclick="toggleMode('scrape')" class="flex-1 py-3 rounded-xl font-bold transition bg-white shadow-sm text-purple-600">URL Scraper</button>
+            <button id="btnSearch" onclick="toggleMode('search')" class="flex-1 py-3 rounded-xl font-bold transition text-gray-500">Web Search</button>
+        </div>
+
+        <div id="forms-container">
+            <form id="scrapeForm" class="space-y-4">
+                <input type="text" id="url" placeholder="https://example.com" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all" required />
+                <input type="text" id="keyword" placeholder="Target keyword..." class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all" />
+                <button type="submit" class="w-full bg-gray-900 text-white p-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">Analyze Site</button>
+            </form>
+
+            <form id="searchForm" class="space-y-4 hidden">
+                <input type="text" id="searchKeyword" placeholder="Search the web..." class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" required />
+                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">Google Search</button>
+            </form>
+        </div>
+
+        <div id="loadingOverlay" class="absolute inset-0 flex flex-col justify-center items-center z-50 hidden rounded-[2.5rem]">
+            <div class="loader-ring mb-4"></div>
+            <p class="text-purple-700 font-bold text-sm tracking-wide animate-pulse-slow">Extracting Intelligence...</p>
+        </div>
+
+        <div id="error" class="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-medium hidden"></div>
+        <div id="result" class="space-y-6 hidden pt-4"></div>
+
+        <button id="downloadBtn" class="hidden w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-600 active:scale-95">
+            Export Report (CSV)
+        </button>
+    </main>
+
+    <footer class="text-center mt-12 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+        Built with ❤️ by <span class="text-gray-800">Growth Swift</span>
+    </footer>
+
+    <script>
+        // --- FIX: Define the base URL explicitly ---
+        const API_BASE_URL = "http://127.0.0.1:5000"; 
+
+        const sForm = document.getElementById("scrapeForm");
+        const gForm = document.getElementById("searchForm");
+        const resDiv = document.getElementById("result");
+        const errDiv = document.getElementById("error");
+        const dlBtn = document.getElementById("downloadBtn");
+        const loader = document.getElementById("loadingOverlay");
+
+        function toggleMode(mode) {
+            resDiv.innerHTML = ""; resDiv.classList.add("hidden");
+            dlBtn.classList.add("hidden"); errDiv.classList.add("hidden");
+            
+            if (mode === 'search') {
+                sForm.classList.add('hidden'); gForm.classList.remove('hidden');
+                document.getElementById('btnSearch').className = "flex-1 py-3 rounded-xl font-bold bg-white shadow-sm text-blue-600";
+                document.getElementById('btnScrape').className = "flex-1 py-3 rounded-xl font-bold text-gray-400";
+                // Set download link handler for search mode
+                dlBtn.onclick = () => window.location.href = `${API_BASE_URL}/download_csv`;
+            } else {
+                gForm.classList.add('hidden'); sForm.classList.remove('hidden');
+                document.getElementById('btnScrape').className = "flex-1 py-3 rounded-xl font-bold bg-white shadow-sm text-purple-600";
+                document.getElementById('btnSearch').className = "flex-1 py-3 rounded-xl font-bold text-gray-400";
+                // Set download link handler for scrape mode
+                dlBtn.onclick = () => window.location.href = `${API_BASE_URL}/download_csv`;
+            }
+        }
+
+        sForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            resetUI();
+            loader.classList.remove("hidden");
+
+            try {
+                // FIX: Using API_BASE_URL for scrape
+                const response = await fetch(`${API_BASE_URL}/scrape`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: document.getElementById("url").value, keyword: document.getElementById("keyword").value }),
+                });
+                
+                if (!response.ok) { // Important to check response status before parsing JSON
+                    const errorText = await response.text();
+                    throw new Error(`Server Error (${response.status}): ${errorText.substring(0, 100)}...`);
+                }
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                let html = `
+                    <div class="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                        <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest block mb-2">Metadata</span>
+                        <h3 class="font-bold text-gray-900 leading-tight">${data.title || 'N/A'}</h3>
+                        <p class="text-sm text-gray-500 mt-2">${data.description || 'No description'}</p>
+                    </div>`;
+
+                if(data.keyword && data.keyword.count > 0) {
+                    html += `
+                    <div class="p-6 bg-emerald-50 rounded-3xl border border-emerald-100">
+                        <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Keyword Insights: ${data.keyword.term}</span>
+                        <div class="space-y-2 mt-3">
+                            ${data.keyword.context_descriptions.map(desc => `<div class="p-3 bg-white/50 rounded-xl text-[11px] text-emerald-900 border border-emerald-200/50 italic">"...${desc}..."</div>`).join('')}
+                        </div>
+                    </div>`;
+                }
+
+                resDiv.innerHTML = html;
+                resDiv.classList.remove("hidden");
+                dlBtn.classList.remove("hidden");
+            } catch (err) { handleError(err, err.message); }
+            finally { loader.classList.add("hidden"); }
+        });
+
+        gForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            resetUI();
+            loader.classList.remove("hidden");
+            try {
+                // FIX: Using API_BASE_URL for search
+                const response = await fetch(`${API_BASE_URL}/search`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ keyword: document.getElementById("searchKeyword").value }),
+                });
+
+                if (!response.ok) { // Important to check response status before parsing JSON
+                    const errorText = await response.text();
+                    throw new Error(`Server Error (${response.status}): ${errorText.substring(0, 100)}...`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+
+                resDiv.innerHTML = data.results.map(r => `
+                    <div class="p-4 border-b border-gray-100 hover:bg-gray-50/50 rounded-xl transition-colors">
+                        <a href="${r.link}" target="_blank" class="text-blue-600 font-bold text-sm block">${r.title}</a>
+                        <p class="text-gray-500 text-[11px] leading-relaxed mt-1">${r.snippet}</p>
+                    </div>`).join('');
+                resDiv.classList.remove("hidden");
+                dlBtn.classList.remove("hidden");
+            } catch (err) { handleError(err, err.message || "Search Failed"); }
+            finally { loader.classList.add("hidden"); }
+        });
+
+        function resetUI() {
+            errDiv.classList.add("hidden");
+            resDiv.classList.add("hidden");
+            dlBtn.classList.add("hidden");
+        }
+        
+        function handleError(err, message) {
+            errDiv.innerText = message || err.message;
+            errDiv.classList.remove("hidden");
+        }
+        
+        // Initialize the first mode on load
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleMode('scrape');
+        });
+    </script>
+</body>
+</html>
