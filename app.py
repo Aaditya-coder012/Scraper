@@ -1,3 +1,5 @@
+
+import os
 import io
 import traceback
 import pandas as pd
@@ -169,10 +171,5 @@ def download_csv():
 
 # --- STARTUP ---
 if __name__ == '__main__':
-    print("--- Starting Flask App on http://127.0.0.1:5000 ---")
-    # Only call app.run() ONCE
-<<<<<<< HEAD
-    app.run(debug=True, host = '0.0.0.0')
-=======
-    app.run(debug=True, host = '0.0.0.0')
->>>>>>> 289c3039c59bca2b7c5d7a26879547a1e488c2b0
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
