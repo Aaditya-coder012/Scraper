@@ -1,3 +1,4 @@
+# scraper/__init__.py
 from .email_crawler import crawl_site
 from .fetcher import HTMLFetcher
 from .parser import HTMLParser

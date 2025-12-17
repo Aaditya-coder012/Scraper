@@ -1,11 +1,11 @@
 flask
 flask-cors
-pandas
 requests
 beautifulsoup4
-fake_useragent
 lxml
-werkzeug
-playwright
+pandas
 python-whois
+fake-useragent
+playwright
 gunicorn
+werkzeug

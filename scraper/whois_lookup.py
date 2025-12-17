@@ -1,27 +1,30 @@
 import whois
+import logging
 from urllib.parse import urlparse
-from datetime import datetime
 
 class WhoisLookup:
     def lookup(self, url):
-        # Ensure url has a scheme for urlparse to work
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            
-        domain = urlparse(url).netloc.replace("www.", "")
         try:
+            # Clean the URL to get just the domain (e.g., example.com)
+            domain = urlparse(url).netloc
+            if not domain:
+                domain = url.split('/')[0]
+            
+            logging.info(f"Performing WHOIS lookup for: {domain}")
             w = whois.whois(domain)
             
-            def fmt_date(d):
-                if isinstance(d, list) and d: d = d[0]
-                return d.strftime("%Y-%m-%d") if isinstance(d, datetime) else str(d)
+            # Extract dates safely (handling lists or single objects)
+            def format_date(d):
+                if isinstance(d, list):
+                    return str(d[0].date()) if d[0] else "N/A"
+                return str(d.date()) if d else "N/A"
 
             return {
-                "domain": domain,
-                "registrar": getattr(w, 'registrar', ""),
-                "creation_date": fmt_date(getattr(w, 'creation_date', "")),
-                "expiration_date": fmt_date(getattr(w, 'expiration_date', "")),
-                "country": getattr(w, 'country', ""),
+                "registrar": w.registrar if w.registrar else "Private/Unknown",
+                "creation_date": format_date(w.creation_date),
+                "expiration_date": format_date(w.expiration_date),
+                "status": w.status[0] if isinstance(w.status, list) else w.status
             }
         except Exception as e:
-            return {"domain": domain, "error": str(e)}
+            logging.error(f"WHOIS lookup failed for {url}: {e}")
+            return "N/A (Lookup Blocked or Private)"
