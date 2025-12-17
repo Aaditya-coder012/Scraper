@@ -1,5 +1,3 @@
-import sys
-import os
 import io
 import traceback
 import pandas as pd
@@ -11,13 +9,9 @@ from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# --- ENVIRONMENT FIX FOR DEPLOYMENT ---
-# Ensures the root directory is in the python path for module discovery
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 # --- IMPORT EXTERNAL UTILITIES ---
 try:
-    # Changed 'Scraper' to 'scraper' to match your folder structure exactly
+    # Ensure the 'scraper' directory has an __init__.py file
     from scraper.email_crawler import crawl_site
     from scraper.fetcher import HTMLFetcher
     from scraper.parser import HTMLParser
@@ -40,6 +34,7 @@ except ImportError as e:
 
 # --- APP CONFIGURATION ---
 app = Flask(__name__)
+# Standard ProxyFix for handling headers if behind a proxy like Nginx
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 CORS(app)
 
@@ -47,7 +42,7 @@ CORS(app)
 SERPER_API_KEY = "7a8e0ca2485bd022e521147b9d713577001f46a9"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Global state
+# Global state (Note: Use Redis/Database for production)
 last_scraped_data = None  
 last_mode = None          
 
@@ -174,6 +169,6 @@ def download_csv():
 
 # --- STARTUP ---
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    print(f"--- Starting Flask App on port {port} ---")
-    app.run(debug=True, host='0.0.0.0', port=port)
+    print("--- Starting Flask App on http://127.0.0.1:5000 ---")
+    # Only call app.run() ONCE
+    app.run(debug=True, host = '0.0.0.0')
