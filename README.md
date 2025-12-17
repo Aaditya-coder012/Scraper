@@ -34,6 +34,8 @@ The system is built with a modular approach for high maintainability:
 
 Plaintext
 
+<img width="764" height="416" alt="Screenshot 2025-12-17 210911" src="https://github.com/user-attachments/assets/74de4d96-5097-406d-a1aa-973597950e41" />
+
 
 ----------------------------------------------------------------------------------------------------
 
