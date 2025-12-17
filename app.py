@@ -22,7 +22,7 @@ except ImportError as e:
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 SERPER_API_KEY = "7a8e0ca2485bd022e521147b9d713577001f46a9"
 logging.basicConfig(level=logging.INFO)
@@ -78,4 +78,4 @@ def scrape_route():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=False, host='0.0.0.0', port=port)
