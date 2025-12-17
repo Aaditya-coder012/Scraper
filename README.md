@@ -34,8 +34,7 @@ The system is built with a modular approach for high maintainability:
 
 Plaintext
 
-growth_swift/
-├── scraper/                # Core Logic Modules
+scraper/                # Core Logic Modules
 │   ├── email_crawler.py    # BFS crawling & contact aggregation
 │   ├── fetcher.py          # Hybrid Requests/Playwright engine
 │   ├── metadata_extractor.py # SEO & OG tag parsing

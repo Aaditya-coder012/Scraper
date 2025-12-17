@@ -8,3 +8,4 @@ lxml
 werkzeug
 playwright
 python-whois
+gunicorn
