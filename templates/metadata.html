@@ -84,7 +84,7 @@
 
     <script>
         // --- FIX: Define the base URL explicitly ---
-        const API_BASE_URL = "http://127.0.0.1:5000"; 
+        // const API_BASE_URL = "http://127.0.0.1:5000"; 
 
         const sForm = document.getElementById("scrapeForm");
         const gForm = document.getElementById("searchForm");
@@ -119,7 +119,7 @@
 
             try {
                 // FIX: Using API_BASE_URL for scrape
-                const response = await fetch(`${API_BASE_URL}/scrape`, {
+                const response = await fetch(`/scrape`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ url: document.getElementById("url").value, keyword: document.getElementById("keyword").value }),
@@ -163,7 +163,7 @@
             loader.classList.remove("hidden");
             try {
                 // FIX: Using API_BASE_URL for search
-                const response = await fetch(`${API_BASE_URL}/search`, {
+                const response = await fetch(`/search`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ keyword: document.getElementById("searchKeyword").value }),

@@ -85,7 +85,7 @@
     </footer>
 
     <script>
-        const API_BASE_URL = "http://127.0.0.1:5000"; 
+        // const API_BASE_URL = "http://127.0.0.1:5000"; 
         let emailResults = []; 
 
         const eForm = document.getElementById("emailForm");
@@ -117,7 +117,7 @@
             loader.style.display = "flex";
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/crawl`, {
+                const response = await fetch(`/api/crawl`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ url, max_pages })
@@ -145,7 +145,7 @@
                     pageOutputEmail.value = text;
                     
                     dlBtn.onclick = async () => {
-                        const dlResponse = await fetch(`${API_BASE_URL}/api/download`, {
+                        const dlResponse = await fetch(`/api/download`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ results: emailResults })
