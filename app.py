@@ -159,13 +159,7 @@ def download_csv():
         return jsonify({"error": "Export failed"}), 500
 
 # --- STARTUP ---
-import os
-
 if __name__ == '__main__':
-    # Render assigns a dynamic port; we must use it.
-    # We use 10000 as a default because that is Render's standard.
-    port = int(os.environ.get("PORT", 10000))
-    
-    # CRITICAL: host MUST be '0.0.0.0'
-    print(f"--- Deployment: Binding to 0.0.0.0:{port} ---")
-    app.run(host='0.0.0.0', port=port)
+    print("--- Starting Flask App on http://127.0.0.1:5000 ---")
+    # Only call app.run() ONCE
+    app.run(debug=True, port=5000)

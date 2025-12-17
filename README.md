@@ -34,20 +34,7 @@ The system is built with a modular approach for high maintainability:
 
 Plaintext
 
-scraper/                # Core Logic Modules
-│   ├── email_crawler.py    # BFS crawling & contact aggregation
-│   ├── fetcher.py          # Hybrid Requests/Playwright engine
-│   ├── metadata_extractor.py # SEO & OG tag parsing
-│   ├── whois_lookup.py     # Domain registration info
-│   ├── proxymanager.py     # Proxy rotation logic
-│   ├── parser.py           # BeautifulSoup wrapper
-│   └── utils.py            # Regex & URL normalization helpers
-├── templates/              # Flask Frontend
-│   ├── UI.html             # Master Control Panel
-│   ├── metadata.html       # SEO Intelligence Interface
-│   └── pagecontent.html    # Contact Extractor Interface
-├── app.py                  # Flask Backend API & Routing
-└── requirements.txt        # Dependency List
+<img width="764" height="416" alt="image" src="https://github.com/user-attachments/assets/844471cf-debe-4970-a37e-00dd43b5d0f9" />
 
 ----------------------------------------------------------------------------------------------------
 
