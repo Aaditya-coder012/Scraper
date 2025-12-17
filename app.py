@@ -171,4 +171,8 @@ def download_csv():
 if __name__ == '__main__':
     print("--- Starting Flask App on http://127.0.0.1:5000 ---")
     # Only call app.run() ONCE
+<<<<<<< HEAD
     app.run(debug=True, host = '0.0.0.0')
+=======
+    app.run(debug=True, host = '0.0.0.0')
+>>>>>>> 289c3039c59bca2b7c5d7a26879547a1e488c2b0
