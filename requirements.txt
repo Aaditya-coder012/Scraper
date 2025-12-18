@@ -1,12 +1,8 @@
 flask
 flask-cors
 requests
+pandas
 beautifulsoup4
 lxml
-pandas
-python-whois
-fake-useragent
-cloudscraper
-js2py
-gunicorn
 werkzeug
+gunicorn
