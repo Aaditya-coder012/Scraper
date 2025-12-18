@@ -20,8 +20,7 @@
 
     <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white/70 backdrop-blur-md px-8 py-6 rounded-3xl shadow-sm border border-white/50">
         <div class="flex items-center space-x-6">
-            <img src="/static/2024 logo-02.png " alt="Logo" class="h-20 w-auto object-contain" />
-            
+            <img src="/static/2024 logo-02.png" alt="Logo" class="h-20 w-auto object-contain" />
             <div class="border-l-2 border-gray-100 pl-6">
                 <h1 class="text-3xl font-black text-gray-900 tracking-tight">Growth <span class="text-purple-600">Swift</span></h1>
                 <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Master Control Panel</p>
@@ -39,7 +38,7 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4">
-            <a href="/templates/metadata.html" 
+            <a href="/metadata" 
                class="tool-card group flex items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 text-left">
                 
                 <div class="icon-box w-14 h-14 rounded-xl bg-purple-50 flex items-center justify-center transition-all duration-300 flex-shrink-0">
@@ -65,7 +64,7 @@
                 </div>
             </a>
 
-            <a href="/templates/pagecontent.html" 
+            <a href="/extractor" 
                class="tool-card group flex items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 text-left">
                 <div class="icon-box w-14 h-14 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center transition-all duration-300 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -84,5 +83,10 @@
         Built with ❤️ by <span class="text-gray-800">Growth Swift</span>
     </footer>
 
+    <script>
+        // Use current site origin for API calls on Render
+        const API_BASE_URL = window.location.origin;
+        console.log("Growth Swift UI Initialized at:", API_BASE_URL);
+    </script>
 </body>
 </html>
